@@ -20,7 +20,7 @@ func CreatedBikeType(ctx *gin.Context) {
 	var payload ReqBikeType
 
 	if err := ctx.ShouldBind(&payload); err != nil {
-		logrus.Println("Bad Request", err)
+		logrus.Println("Bad Request Error", err)
 		fmt.Println("Error request: ", err)
 		res.Code = http.StatusBadRequest
 		res.Message = "Bad Request"

@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type ReqBikeType struct {
@@ -19,6 +20,7 @@ func CreatedBikeType(ctx *gin.Context) {
 	var payload ReqBikeType
 
 	if err := ctx.ShouldBind(&payload); err != nil {
+		logrus.Println("Bad Request", err)
 		fmt.Println("Error request: ", err)
 		res.Code = http.StatusBadRequest
 		res.Message = "Bad Request"

@@ -33,7 +33,7 @@ func CreatedBikeType(ctx *gin.Context) {
 	}
 
 	if err := repository.CreateBikeType(ctx, data); err != nil {
-		fmt.Println("Error create data: ", err)
+		fmt.Println("Error create bike type: ", err)
 		res.Code = http.StatusUnprocessableEntity
 		res.Message = "Failed Create Data"
 

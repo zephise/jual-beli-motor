@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"jual-beli-motor/models"
 	"jual-beli-motor/repository"
 	"net/http"
@@ -21,7 +20,7 @@ func CreatedBikeType(ctx *gin.Context) {
 
 	if err := ctx.ShouldBind(&payload); err != nil {
 		logrus.Println("Bad Request Error", err)
-		fmt.Println("Error request: ", err)
+		logrus.Println("Error request: ", err)
 		res.Code = http.StatusBadRequest
 		res.Message = "Bad Request"
 
@@ -35,7 +34,7 @@ func CreatedBikeType(ctx *gin.Context) {
 	}
 
 	if err := repository.CreateBikeType(ctx, data); err != nil {
-		fmt.Println("Error create bike type: ", err)
+		logrus.Println("Error create bike type: ", err)
 		res.Code = http.StatusUnprocessableEntity
 		res.Message = "Failed Create Data"
 
@@ -53,7 +52,7 @@ func GetAllBikeType(ctx *gin.Context) {
 	var param models.ReqBikeParams
 
 	if err := ctx.BindQuery(&param); err != nil {
-		fmt.Println("Error bind query", err)
+		logrus.Println("Error bind query", err)
 		res.Code = http.StatusBadRequest
 		res.Message = "Bad Request"
 
@@ -61,12 +60,10 @@ func GetAllBikeType(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println(param)
-
 	data, err := repository.GetAllBikeType(ctx, param)
 
 	if err != nil {
-		fmt.Println("Error get data:", err)
+		logrus.Println("Error get data:", err)
 		res.Code = http.StatusInternalServerError
 		res.Message = "Server Error"
 
@@ -88,7 +85,7 @@ func GetBikeTypeById(ctx *gin.Context) {
 	data, err := repository.GetBikeTypeById(ctx, id)
 
 	if err != nil {
-		fmt.Println("Data not found")
+		logrus.Println("Data not found")
 		res.Code = http.StatusNotFound
 		res.Message = "Data Not Found"
 		ctx.JSON(res.Code, res)
@@ -109,7 +106,7 @@ func UpdateBikeType(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 
 	if err := ctx.ShouldBind(&payload); err != nil {
-		fmt.Println("Bad Request")
+		logrus.Println("Bad Request")
 		res.Code = http.StatusBadRequest
 		res.Message = "Bad Request"
 		ctx.JSON(res.Code, res)
@@ -119,7 +116,7 @@ func UpdateBikeType(ctx *gin.Context) {
 	data, err := repository.GetBikeTypeById(ctx, id)
 
 	if err != nil {
-		fmt.Println("Data not found")
+		logrus.Println("Data not found")
 		res.Code = http.StatusNotFound
 		res.Message = "Data Not Found"
 		ctx.JSON(res.Code, res)
@@ -129,7 +126,7 @@ func UpdateBikeType(ctx *gin.Context) {
 	data.Name = payload.Name
 
 	if err := repository.UpdateBikeType(ctx, data, id); err != nil {
-		fmt.Println("Failed Update Bike Type:", err)
+		logrus.Println("Failed Update Bike Type:", err)
 		res.Code = http.StatusUnprocessableEntity
 		res.Message = "Failed Update Data"
 

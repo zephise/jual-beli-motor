@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -39,11 +40,11 @@ func InitDB() {
 	})
 
 	if err != nil {
-		fmt.Println("Error Connect database", err)
+		logrus.Println("Error Connect database", err)
 		panic(500)
 	}
 
-	fmt.Println("Connection Successfully")
+	logrus.Println("Connection Successfully")
 
 	if debug == "true" {
 		DB.Debug()

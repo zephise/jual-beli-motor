@@ -27,6 +27,7 @@ func Routes() {
 	{
 		bike.POST("/", middleware.Authentication("user"), controllers.CreateBike)
 		bike.GET("/", middleware.Authentication("user"), controllers.GetAllBike)
+		bike.GET("/check-bike-status", middleware.Authentication("user"), controllers.CheckBikeStatus)
 		bike.PUT("/:id", middleware.Authentication("user"), controllers.UpdateBike)
 		bike.DELETE("/:id", middleware.Authentication("user"), controllers.DeleteBikeById)
 		bike.GET("/:id", controllers.GetBikeDetail)

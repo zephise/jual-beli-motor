@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,6 +23,7 @@ func Login(ctx *gin.Context) {
 	var payload ReqGetUserByEmail
 	var res Response
 	if err := ctx.BindJSON(&payload); err != nil {
+		logrus.Println("Bad Request", err)
 		res.Code = http.StatusOK
 		res.Message = "Bad Request"
 		ctx.JSON(res.Code, res)
@@ -31,6 +33,7 @@ func Login(ctx *gin.Context) {
 	user, err := repository.GetUserByEmail(ctx, payload.Email)
 
 	if err != nil {
+		logrus.Println("User Not Found")
 		res.Code = http.StatusNotFound
 		res.Message = "User Not Found"
 		ctx.JSON(res.Code, res)
@@ -38,6 +41,7 @@ func Login(ctx *gin.Context) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)); err != nil {
+		logrus.Println("Wrong Password")
 		res.Code = http.StatusUnauthorized
 		res.Message = "Wrong Password"
 
@@ -73,6 +77,7 @@ func CreateUserNonAdmin(ctx *gin.Context) {
 	payload := models.ReqUser{}
 
 	if err := ctx.ShouldBind(&payload); err != nil {
+		logrus.Println("Bad Request", err)
 		res.Code = http.StatusBadRequest
 		res.Message = "Bad Request"
 
@@ -81,6 +86,7 @@ func CreateUserNonAdmin(ctx *gin.Context) {
 	}
 
 	if err := helper.Validate(payload); err != nil {
+		logrus.Println("Bad Request", err)
 		res.Code = http.StatusBadRequest
 		res.Message = err.Error()
 
@@ -91,6 +97,7 @@ func CreateUserNonAdmin(ctx *gin.Context) {
 	existEmail, _ := repository.GetUserByEmail(ctx, payload.Email)
 
 	if existEmail.Id != 0 {
+		logrus.Println("Email Already Registered")
 		res.Code = http.StatusBadRequest
 		res.Message = "Email Already Registered"
 
@@ -101,6 +108,7 @@ func CreateUserNonAdmin(ctx *gin.Context) {
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Email), bcrypt.DefaultCost)
 
 	if err != nil {
+		logrus.Println("Encryption Error", err)
 		res.Code = http.StatusInternalServerError
 		res.Message = "Internal Server"
 
@@ -116,6 +124,7 @@ func CreateUserNonAdmin(ctx *gin.Context) {
 	}
 
 	if err := repository.CreateUser(ctx, newUser); err != nil {
+		logrus.Println("Failed Create User", err)
 		res.Code = http.StatusUnprocessableEntity
 		res.Message = "Failed Create User"
 

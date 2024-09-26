@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"jual-beli-motor/helper"
 	"jual-beli-motor/models"
 	"jual-beli-motor/repository"
@@ -25,11 +24,18 @@ func CreateBike(ctx *gin.Context) {
 		return
 	}
 
+	userInfo := &models.ClaimJwt{}
+
+	if ctx.Value("user") != nil {
+		userInfo = ctx.Value("user").(*models.ClaimJwt)
+	}
+
 	data := repository.Bike{
 		BikeTypeId:  payload.BikeTypeId,
 		Name:        payload.Name,
 		Description: payload.Description,
 		Price:       payload.Price,
+		UserID:      userInfo.Id,
 	}
 
 	if err := repository.CreateBike(ctx, data); err != nil {
@@ -68,9 +74,27 @@ func GetAllBike(ctx *gin.Context) {
 		return
 	}
 
+	response := []models.ResBike{}
+	for _, val := range data {
+		response = append(response, models.ResBike{
+			Id:           val.Id,
+			BikeTypeId:   val.BikeTypeId,
+			BikeTypeName: val.BikeType.Name,
+			UserID:       val.UserID,
+			UserName:     val.User.Username,
+			Name:         val.Name,
+			Description:  val.Description,
+			Price:        val.Price,
+			Status:       val.Status,
+			Image:        val.Image,
+			CreatedAt:    val.CreatedAt,
+			UpdatedAt:    val.UpdatedAt,
+		})
+	}
+
 	res.Code = http.StatusOK
 	res.Message = "Success Get Data"
-	res.Data = data
+	res.Data = response
 
 	ctx.JSON(res.Code, res)
 }
@@ -83,7 +107,7 @@ func UpdateBike(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 
 	if err := ctx.ShouldBind(&payload); err != nil {
-		fmt.Println("Bad Request", err)
+		logrus.Println("Bad Request", err)
 		res.Code = http.StatusBadRequest
 		res.Message = "Bad Request"
 		ctx.JSON(res.Code, res)
@@ -101,7 +125,7 @@ func UpdateBike(ctx *gin.Context) {
 	data, err := repository.GetBikeById(ctx, id)
 
 	if err != nil {
-		fmt.Println("Data not found", err)
+		logrus.Println("Data not found", err)
 		res.Code = http.StatusNotFound
 		res.Message = "Data Not Found"
 		ctx.JSON(res.Code, res)
@@ -113,7 +137,7 @@ func UpdateBike(ctx *gin.Context) {
 	data.Price = payload.Price
 
 	if err := repository.UpdateBike(ctx, data, id); err != nil {
-		fmt.Println("Failed Update Bike:", err)
+		logrus.Println("Failed Update Bike:", err)
 		res.Code = http.StatusUnprocessableEntity
 		res.Message = "Failed Update Data"
 
@@ -134,7 +158,7 @@ func GetBikeDetail(ctx *gin.Context) {
 	data, err := repository.GetBikeById(ctx, id)
 
 	if err != nil {
-		fmt.Println("Data not found", err)
+		logrus.Println("Data not found", err)
 		res.Code = http.StatusNotFound
 		res.Message = "Data Not Found"
 		ctx.JSON(res.Code, res)
@@ -170,5 +194,31 @@ func DeleteBikeById(ctx *gin.Context) {
 
 	res.Code = http.StatusOK
 	res.Message = "Success Delete Data"
+	ctx.JSON(res.Code, res)
+}
+
+func CheckBikeStatus(ctx *gin.Context) {
+	var res Response
+	id, _ := strconv.Atoi(ctx.Param("id"))
+
+	data, err := repository.GetBikeById(ctx, id)
+
+	if err != nil {
+		logrus.Println("Data not found", err)
+		res.Code = http.StatusNotFound
+		res.Message = "Data Not Found"
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	if data.Status == 0 {
+		res.Code = http.StatusUnprocessableEntity
+		res.Message = "Bike Has Been Sold"
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	res.Code = http.StatusOK
+	res.Message = "Success"
 	ctx.JSON(res.Code, res)
 }

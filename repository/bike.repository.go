@@ -12,9 +12,11 @@ type Bike struct {
 	BikeTypeId  int        `gorm:"column:bike_types_id" json:"bike_types_id"`
 	BikeType    BikeType   `gorm:"reference:bike_types_id;foreignKey:id" json:"bike_types"`
 	UserID      int        `gorm:"column:user_id" json:"user_id"`
+	User        User       `gorm:"references:user_id; foreignKey:id" json:"user"`
 	Name        string     `gorm:"column:name" json:"name"`
 	Description string     `gorm:"column:description" json:"description"`
 	Price       int        `gorm:"column:price" json:"price"`
+	Status      int        `gorm:"column:status" json:"status"`
 	Image       string     `gorm:"column:image" json:"image"`
 	CreatedAt   time.Time  `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt   *time.Time `gorm:"column:updated_at" json:"updated_at"`
@@ -35,6 +37,7 @@ func GetAllBike(ctx *gin.Context, params models.ReqParams) ([]Bike, error) {
 	var data []Bike
 	query := DB.Model(&data)
 	query = query.Joins("BikeType")
+	query = query.Joins("User")
 	if params.Search != "" {
 		query = query.Where("bikes.name like ?", "%"+params.Search+"%")
 	}

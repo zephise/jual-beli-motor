@@ -13,6 +13,7 @@ func Routes() {
 	r.GET("/health-check", controllers.HealthCheck)
 	r.POST("/auth/login", controllers.Login)
 	r.POST("/auth/register", controllers.CreateUserNonAdmin)
+	r.POST("/auth/admin/register", controllers.CreateUserAdmin)
 
 	bikeType := r.Group("/bike-type")
 	{
@@ -31,6 +32,13 @@ func Routes() {
 		bike.PUT("/:id", middleware.Authentication("user"), controllers.UpdateBike)
 		bike.DELETE("/:id", middleware.Authentication("user"), controllers.DeleteBikeById)
 		bike.GET("/:id", controllers.GetBikeDetail)
+		bike.POST("/purchase/:id", middleware.Authentication("user"), controllers.PurchaseBike)
+	}
+
+	coupon := r.Group("/coupon")
+	{
+		coupon.POST("/", middleware.Authentication("admin"), controllers.CreateCoupon)
+
 	}
 
 	r.Run(os.Getenv("PORT"))

@@ -37,3 +37,8 @@ type ResBike struct {
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    *time.Time `json:"updated_at"`
 }
+
+type BikeStatus struct {
+	Id     int `json:"id"`
+	Status int `json:"status"`
+}

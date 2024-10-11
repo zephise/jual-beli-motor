@@ -134,3 +134,68 @@ func CreateUserNonAdmin(ctx *gin.Context) {
 	res.Message = "Success Create User"
 	ctx.JSON(res.Code, res)
 }
+
+func CreateUserAdmin(ctx *gin.Context) {
+	res := Response{}
+	payload := models.ReqUser{}
+
+	if err := ctx.ShouldBind(&payload); err != nil {
+		logrus.Println("Bad Request", err)
+		res.Code = http.StatusBadRequest
+		res.Message = "Bad Request"
+
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	if err := helper.Validate(payload); err != nil {
+		logrus.Println("Bad Request", err)
+		res.Code = http.StatusBadRequest
+		res.Message = err.Error()
+
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	existEmail, _ := repository.GetUserByEmail(ctx, payload.Email)
+
+	if existEmail.Id != 0 {
+		logrus.Println("Email Already Registered")
+		res.Code = http.StatusBadRequest
+		res.Message = "Email Already Registered"
+
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	newPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Email), bcrypt.DefaultCost)
+
+	if err != nil {
+		logrus.Println("Encryption Error", err)
+		res.Code = http.StatusInternalServerError
+		res.Message = "Internal Server"
+
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	logrus.Println(payload.Password)
+
+	newUser := repository.User{
+		Username: payload.Name,
+		Email:    payload.Email,
+		Password: string(newPassword),
+		Type:     1,
+	}
+
+	if err := repository.CreateUser(ctx, newUser); err != nil {
+		logrus.Println("Failed Create User", err)
+		res.Code = http.StatusUnprocessableEntity
+		res.Message = "Failed Create User"
+
+		ctx.JSON(res.Code, res)
+	}
+	res.Code = http.StatusCreated
+	res.Message = "Success Create User"
+	ctx.JSON(res.Code, res)
+}

@@ -46,6 +46,8 @@ func GetAllBike(ctx *gin.Context, params models.ReqParams) ([]Bike, error) {
 		query = query.Where("BikeType.id = ?", params.Category)
 	}
 
+	query = query.Where("bikes.status = 1")
+
 	query.Find(&data)
 
 	return data, query.Error
@@ -71,9 +73,17 @@ func UpdateBike(ctx *gin.Context, data Bike, id int) error {
 }
 
 func DeleteBike(ctx *gin.Context, id int) error {
-	query := DB.Table("bike")
+	query := DB.Table("bikes")
 	query = query.Where("id = ?", id)
 	query.Delete(&Bike{})
+
+	return query.Error
+}
+
+func PurchaseBike(ctx *gin.Context, id int) error {
+	query := DB.Table("bikes")
+	query = query.Where("id = ?", id)
+	query.Update("status", "0")
 
 	return query.Error
 }

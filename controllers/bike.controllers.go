@@ -222,3 +222,44 @@ func CheckBikeStatus(ctx *gin.Context) {
 	res.Message = "Success"
 	ctx.JSON(res.Code, res)
 }
+
+func PurchaseBike(ctx *gin.Context) {
+	var res Response
+
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		logrus.Println("Data Not Found", err)
+		res.Code = http.StatusBadRequest
+		res.Message = "Data Not Found"
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	bike, err := repository.GetBikeById(ctx, id)
+	if err != nil {
+		logrus.Println("Bike Not Found", err)
+		res.Code = http.StatusNotFound
+		res.Message = "Bike Not Found"
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	if bike.Status == 0 {
+		res.Code = http.StatusUnprocessableEntity
+		res.Message = "Bike Out Of Stock"
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	if err := repository.PurchaseBike(ctx, id); err != nil {
+		logrus.Println("Failed Update Bike Status:", err)
+		res.Code = http.StatusUnprocessableEntity
+		res.Message = "Failed Bike Purchase"
+		ctx.JSON(res.Code, res)
+		return
+	}
+
+	res.Code = http.StatusOK
+	res.Message = "Bike Purchased Succesfully"
+	ctx.JSON(res.Code, res)
+}
